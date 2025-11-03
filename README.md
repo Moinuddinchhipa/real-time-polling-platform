@@ -51,16 +51,19 @@ npm run dev
 | POST   | /votes/ | Submit a vote |
 
 ## Postman Collection
-Import the included `Real-Time-Polling.postman_collection.json` to test APIs.
+
+Import the included `Real-Time-Polling.postman_collection.json` into Postman to test the APIs.
+1. Open Postman.
+2. Click **Import** → **Upload Files** → select `Real-Time-Polling.postman_collection.json`.
+3. All API endpoints will appear in Postman ready to test.
 
 ## Optional
 - `client.html` demonstrates live updates using charts.
 
 ## Screenshots
 ![4](https://github.com/user-attachments/assets/02c60a72-0d4e-4fc6-a0e8-c3bd3e67665c)
-![4](https://github.com/user-attachments/assets/9b60903b-7adf-4f73-a20b-3487dc2730c4)
 ![5](https://github.com/user-attachments/assets/941763e5-13e0-47c5-9052-4e007083651c)
-![6](h![Uploading 2.jpg…]()
-ttps://github.com/user-attachments/assets/1dbb2e0a-ee24-48eb-9a3e-cc496d4208b7)
 ![1](https://github.com/user-attachments/assets/465fb595-8f41-4cc9-a780-71a52a0d6e5c)
+![3](https://github.com/user-attachments/assets/0169f218-c59e-4373-9ffe-b8ec7b3f504c)
 
+![2](https://github.com/user-attachments/assets/d26c998c-7a5a-4750-a6aa-89cc64e0d159)
