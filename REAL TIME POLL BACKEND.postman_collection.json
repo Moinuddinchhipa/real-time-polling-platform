@@ -1,0 +1,264 @@
+{
+	"info": {
+		"_postman_id": "c62e09a5-8dc3-4068-ac45-150461c5b670",
+		"name": "REAL TIME POLL BACKEND",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39757988"
+	},
+	"item": [
+		{
+			"name": "Register Organizer",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Moin\",\r\n  \"email\": \"moin@example.com\",\r\n  \"password\": \"password123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/auth/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login Organizer",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"moin@example.com\",\r\n  \"password\": \"password123\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Session",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MDZjMzEzY2NiMmUxYjM0NTM0OGZmYiIsImlhdCI6MTc2MjA1MDg5MiwiZXhwIjoxNzYyMTM3MjkyfQ.zr-p1AVo7lxlkPXycKv39Q94voSsKNs5jUZ_XiLbIgY",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Tech Quiz 2025\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/sessions/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"sessions",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Start Session",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MDZjMzEzY2NiMmUxYjM0NTM0OGZmYiIsImlhdCI6MTc2MjA1MDg5MiwiZXhwIjoxNzYyMTM3MjkyfQ.zr-p1AVo7lxlkPXycKv39Q94voSsKNs5jUZ_XiLbIgY",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/api/sessions/6906c3e7ccb2e1b345348ffe/start",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"sessions",
+						"6906c3e7ccb2e1b345348ffe",
+						"start"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Stop Session",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MDZjMzEzY2NiMmUxYjM0NTM0OGZmYiIsImlhdCI6MTc2MjA1MDg5MiwiZXhwIjoxNzYyMTM3MjkyfQ.zr-p1AVo7lxlkPXycKv39Q94voSsKNs5jUZ_XiLbIgY",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/api/sessions/6906c3e7ccb2e1b345348ffe/stop",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"sessions",
+						"6906c3e7ccb2e1b345348ffe",
+						"stop"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Question",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MDZjMzEzY2NiMmUxYjM0NTM0OGZmYiIsImlhdCI6MTc2MjA1MDg5MiwiZXhwIjoxNzYyMTM3MjkyfQ.zr-p1AVo7lxlkPXycKv39Q94voSsKNs5jUZ_XiLbIgY",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"sessionId\": \"6906c3e7ccb2e1b345348ffe\",\r\n    \"questionText\": \"Which protocol does Node.js use for web servers?\",\r\n    \"options\": [\"HTTP\", \"FTP\", \"SMTP\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/questions/add",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"questions",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Questions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/questions/6906c3e7ccb2e1b345348ffe",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"questions",
+						"6906c3e7ccb2e1b345348ffe"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Submit Vote",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"sessionId\":\"6906c3e7ccb2e1b345348ffe\",\r\n  \"questionId\": \"6906c538ccb2e1b345349004\",\r\n  \"optionIndex\": 0,\r\n  \"participantId\": \"participant1\" \r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/votes",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"votes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sessions",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "AllSessions",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}
