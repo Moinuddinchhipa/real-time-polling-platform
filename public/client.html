@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Real-Time Poll Client</title>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    h2 { margin-top: 20px; color: #555; }
+    .question-card { border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; border-radius: 5px; }
+    button { margin-right: 5px; margin-bottom: 5px; padding: 5px 10px; cursor: pointer; }
+    .total-votes { font-weight: bold; margin-top: 5px; }
+    .leading { font-weight: bold; color: green; }
+  </style>
+</head>
+<body>
+  <h1>Real-Time Polling Client</h1>
+
+  <div>
+    <label>Select Session: 
+      <select id="sessionSelect">
+        <option value="">-- Choose a Session --</option>
+      </select>
+    </label>
+    <button id="joinBtn">Join Session</button>
+  </div>
+
+  <h2 id="sessionTitle"></h2>
+
+  <div id="questionsContainer"></div>
+
+  <script>
+    const socket = io("http://localhost:5000");
+    const sessionSelect = document.getElementById("sessionSelect");
+    const joinBtn = document.getElementById("joinBtn");
+    const sessionTitleEl = document.getElementById("sessionTitle");
+    const container = document.getElementById("questionsContainer");
+    const participantId = "participant_" + Math.floor(Math.random() * 10000);
+
+    let sessions = [];
+    let sessionId = "";
+    let questions = [];
+    const charts = {};
+
+    async function loadSessions() {
+      try {
+        const token = prompt("Enter your organizer token for session list:");
+        if (!token) return alert("Token required to fetch sessions.");
+
+        const res = await fetch("http://localhost:5000/api/sessions", {
+          headers: { Authorization: "Bearer " + token }
+        });
+        if (!res.ok) throw new Error("Cannot fetch sessions");
+        sessions = await res.json();
+
+        sessions.forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = s._id;
+          opt.text = s.title;
+          sessionSelect.appendChild(opt);
+        });
+      } catch (err) {
+        console.error(err);
+        alert("Error fetching sessions.");
+      }
+    }
+
+    loadSessions();
+
+    joinBtn.addEventListener("click", async () => {
+      sessionId = sessionSelect.value;
+      if (!sessionId) return alert("Please select a session.");
+
+      socket.emit("joinSession", sessionId);
+      alert(`Joined session: ${sessionId}`);
+
+      const selectedSession = sessions.find(s => s._id === sessionId);
+      sessionTitleEl.innerText = selectedSession ? selectedSession.title : "";
+
+      try {
+        const res = await fetch(`http://localhost:5000/api/sessions/${sessionId}`);
+        if (!res.ok) return alert("Session not found or server error.");
+        const data = await res.json();
+        questions = data.questions;
+        renderQuestions();
+      } catch (err) {
+        console.error(err);
+        alert("Error fetching questions.");
+      }
+    });
+
+    function renderQuestions() {
+      container.innerHTML = "";
+      questions.forEach((q, qIndex) => {
+        const div = document.createElement("div");
+        div.className = "question-card";
+
+        const title = document.createElement("h3");
+        title.innerText = q.questionText;
+        div.appendChild(title);
+
+        const totalVotesEl = document.createElement("div");
+        totalVotesEl.id = `totalVotes${qIndex}`;
+        totalVotesEl.className = "total-votes";
+        div.appendChild(totalVotesEl);
+
+        q.options.forEach((opt, oIndex) => {
+          const btn = document.createElement("button");
+          btn.id = `q${qIndex}o${oIndex}`;
+          btn.innerText = `${opt.text} (${opt.votes} votes)`;
+          btn.addEventListener("click", () => submitVote(q, oIndex));
+          div.appendChild(btn);
+        });
+
+        const canvas = document.createElement("canvas");
+        canvas.id = `chart${qIndex}`;
+        canvas.width = 300;
+        canvas.height = 150;
+        canvas.style.display = "block";
+        canvas.style.marginTop = "10px";
+        div.appendChild(canvas);
+
+        container.appendChild(div);
+
+        updateTotalVotes(qIndex);
+
+        const ctx = canvas.getContext("2d");
+        charts[qIndex] = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: q.options.map(opt => opt.text),
+            datasets: [{
+              label: "Votes",
+              data: q.options.map(opt => opt.votes),
+              backgroundColor: "rgba(54, 162, 235, 0.6)",
+              borderColor: "rgba(54, 162, 235, 1)",
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: false,
+            maintainAspectRatio: false,
+            layout: { padding: { top: 5, bottom: 5, left: 5, right: 5 } },
+            scales: {
+              y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } } },
+              x: { ticks: { font: { size: 10 } } }
+            },
+            plugins: { legend: { display: false }, tooltip: { bodyFont: { size: 10 } } }
+          }
+        });
+      });
+    }
+
+    function updateTotalVotes(qIndex) {
+      const q = questions[qIndex];
+      if (!q) return;
+
+      const totalVotes = q.options.reduce((sum, opt) => sum + opt.votes, 0);
+      const totalVotesEl = document.getElementById(`totalVotes${qIndex}`);
+      totalVotesEl.innerText = `Total Votes: ${totalVotes}`;
+
+      // Highlight leading option
+      const maxVotes = Math.max(...q.options.map(opt => opt.votes));
+      q.options.forEach((opt, oIndex) => {
+        const btn = document.getElementById(`q${qIndex}o${oIndex}`);
+        if (btn) {
+          if (opt.votes === maxVotes && maxVotes > 0) {
+            btn.classList.add("leading");
+          } else {
+            btn.classList.remove("leading");
+          }
+        }
+      });
+    }
+
+    function submitVote(question, optionIndex) {
+      socket.emit("vote", { sessionId, questionId: question._id || question.id, optionIndex, participantId });
+    }
+
+    function handleVoteUpdate(updatedQuestion) {
+      const qIndex = questions.findIndex(q => q._id === updatedQuestion._id);
+      if (qIndex === -1) return;
+      questions[qIndex] = updatedQuestion;
+
+      updatedQuestion.options.forEach((opt, oIndex) => {
+        const btn = document.getElementById(`q${qIndex}o${oIndex}`);
+        if (btn) btn.innerText = `${opt.text} (${opt.votes} votes)`;
+      });
+
+      const chart = charts[qIndex];
+      if (chart) {
+        chart.data.datasets[0].data = updatedQuestion.options.map(opt => opt.votes);
+        chart.update();
+      }
+
+      updateTotalVotes(qIndex);
+    }
+
+    socket.on("voteUpdate", handleVoteUpdate);
+    socket.on("sessionResults", sessionData => {
+      sessionData.questions.forEach(q => handleVoteUpdate(q));
+    });
+  </script>
+</body>
+</html>

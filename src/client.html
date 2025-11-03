@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Real-Time Poll Client</title>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Real-Time Polling Client</h1>
+
+  <div>
+    <label>Session ID: <input type="text" id="sessionId" placeholder="Enter Session ID"></label>
+    <button id="joinBtn">Join Session</button>
+  </div>
+
+  <hr />
+  <div id="questionsContainer"></div>
+
+  <script>
+    const socket = io("http://localhost:5000");
+    let sessionId = "";
+    const participantId = "participant_" + Math.floor(Math.random() * 10000);
+    const container = document.getElementById("questionsContainer");
+
+    let questions = [];
+
+    // ✅ Step 1 — Join session and fetch questions
+    document.getElementById("joinBtn").addEventListener("click", async () => {
+      sessionId = document.getElementById("sessionId").value.trim();
+      if (!sessionId) return alert("Enter Session ID");
+
+      socket.emit("joinSession", sessionId);
+      alert(`Joined session: ${sessionId}`);
+
+      // ✅ Corrected API path
+      try {
+        const res = await fetch(`http://localhost:5000/api/sessions/${sessionId}`);
+        if (!res.ok) return alert("Session not found or server error.");
+        const data = await res.json();
+        questions = data.questions;
+        renderQuestions();
+      } catch (err) {
+        console.error(err);
+        alert("Error fetching questions.");
+      }
+    });
+
+    // Step 2 — Render questions with vote counts
+    function renderQuestions() {
+      container.innerHTML = "";
+      questions.forEach((q, qIndex) => {
+        const div = document.createElement("div");
+        div.style.border = "1px solid #ccc";
+        div.style.padding = "10px";
+        div.style.marginBottom = "10px";
+
+        const title = document.createElement("h3");
+        title.innerText = q.questionText;
+        div.appendChild(title);
+
+        q.options.forEach((opt, oIndex) => {
+          const btn = document.createElement("button");
+          btn.id = `q${qIndex}o${oIndex}`;
+          btn.innerText = `${opt.text} (${opt.votes} votes)`;
+          btn.style.marginRight = "10px";
+          btn.addEventListener("click", () => submitVote(q, oIndex));
+          div.appendChild(btn);
+        });
+
+        container.appendChild(div);
+      });
+    }
+
+    // Step 3 — Send vote to backend
+    function submitVote(question, optionIndex) {
+      socket.emit("vote", {
+        sessionId,
+        questionId: question._id || question.id,
+        optionIndex,
+        participantId,
+      });
+    }
+
+    // Step 4 — Live vote updates
+    socket.on("voteUpdate", (updatedQuestion) => {
+      const qIndex = questions.findIndex((q) => q._id === updatedQuestion._id);
+      if (qIndex === -1) return;
+      questions[qIndex] = updatedQuestion;
+
+      updatedQuestion.options.forEach((opt, oIndex) => {
+        const btn = document.getElementById(`q${qIndex}o${oIndex}`);
+        if (btn) btn.innerText = `${opt.text} (${opt.votes} votes)`;
+      });
+    });
+
+    // Step 5 — Optional: show total session results
+    socket.on("sessionResults", (sessionData) => {
+      container.innerHTML = "<h2>Live Poll Results</h2>";
+      sessionData.questions.forEach((q) => {
+        const div = document.createElement("div");
+        div.innerHTML = `<h3>${q.questionText}</h3>`;
+        q.options.forEach((opt) => {
+          const p = document.createElement("p");
+          p.innerText = `${opt.text}: ${opt.votes} votes`;
+          div.appendChild(p);
+        });
+        container.appendChild(div);
+      });
+    });
+  </script>
+</body>
+</html>
